@@ -8,9 +8,12 @@ def build_board():
     '''
     return a list of 8 lists each represent a row.
     '''
-    out=[]
+    out=[[str(i) for i in range(9)]]
+    out[0][0]=' '
+    rownum=1
     for row in board:
-        out.append([])
+        out.append([str(rownum)])
+        rownum+=1
         for cell in range(1,9):
             if cell ==row[0]:
                 out[-1].append('w')
@@ -25,15 +28,7 @@ def dis():
     '''
     for i in build_board():
         print(' '.join(i))
-def numsum():
-    '''
-    return the num sum of the boad
-    used to calculate the best winning moves.
-    '''
-    sum=0
-    for row in board:
-        sum^=abs(row[0]-row[1]-1)
-    return sum
+
 def valid(w,b):
     '''
     return True if a move is valid; Otherwise
@@ -102,17 +97,57 @@ def iturn(x):
         return 'b'
     else:
         return 'w'
+def save(turn):
+    import pickle
+    f=open('save.txt','wb')
+    board.append(turn)
+    pickle.dump(board,file =f)
+    f.close()
+    quit()
+def load():
+    import pickle
+    try:
+        f=open('save.txt','rb')
+        li=pickle.load(f)
+    except FileNotFoundError:
+        print('No file found :(')
+        return 'w'
+        turn = li[-1]
+        li.pop()
+        global board
+        board=li
+
+        return turn
 def getinp(turn):
+    '''
+    get input from the playersself.keeps repating till a valid input is entered.
+    '''
     while True:
-        inp = input('{} play:'.format(turn)).split()
-        if len(inp)==2:
+        inp = input('{} play:'.format(turn)).lower().split()
+        if inp==['save']:
+            save(turn)
+        elif len(inp)==2:
             f=open('log.txt','a')
             print('{} {}'.format(inp[0],inp[1]),file=f)
             return int(inp[0]),int(inp[1])
-            print('invalid input\nPlease enter the row number of the piece you want to move and it\'s destination\n')
+        print('invalid input\nPlease enter the row number of the piece you want to move and it\'s destination\n')
+
+def numsum():
+    '''
+    return the num sum of the boad
+    used to calculate the best winning moves.
+    '''
+    sum=0
+    for row in board:
+        sum^=abs(row[0]-row[1]-1)
+    return sum
+
 
 def main():
     print('Welcom to northcotts\n')
+    inp = input('Wannna load last game? (y\\n) :')
+    if inp.strip()[0] == 'y':
+        turn=load()
     logtime()
     turn='b'
     while not end():
@@ -121,6 +156,8 @@ def main():
         row,to=getinp(turn)
         if not play(turn,row,to):
             turn=iturn(turn)
-    dip()
+    dis()
     terminate(turn)
-main()
+
+if __name__=='__main__':
+    main()
